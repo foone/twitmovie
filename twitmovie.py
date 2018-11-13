@@ -21,14 +21,15 @@ if args.outfile is None:
 	args.outfile = os.path.splitext(args.movie)[0] + '-twitter.mp4'
 
 if os.path.exists(args.outfile) and not args.overwrite:
-	response = raw_input('{} exists, overwrite? [y]')
+	response = raw_input('{} exists, overwrite? [y]'.format(args.outfile))
 	if response not in ('','y','Y'):
 		sys.exit()
 
 
 cmd = [
 	'ffmpeg',
-	'-v','quiet',
+	'-v','error',
+	'-y',
 	'-i',args.movie,
 	'-pix_fmt', 'yuv420p', '-vcodec', 'libx264',
 ]
@@ -47,4 +48,9 @@ cmd.extend([
 	args.outfile
 ])
 
-subprocess.check_call(cmd)
+p = subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+stdout,_ = p.communicate()
+if p.returncode != 0:
+	print 'Failed!'
+	print stdout
+
